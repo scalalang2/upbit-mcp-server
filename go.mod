@@ -2,7 +2,11 @@ module upbit-mcp-server
 
 go 1.25
 
-require github.com/modelcontextprotocol/go-sdk v1.1.0
+require (
+	github.com/golang-jwt/jwt/v5 v5.2.2
+	github.com/google/uuid v1.6.0
+	github.com/modelcontextprotocol/go-sdk v1.1.0
+)
 
 require (
 	github.com/google/jsonschema-go v0.3.0 // indirect
