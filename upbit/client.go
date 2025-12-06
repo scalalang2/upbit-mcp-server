@@ -512,11 +512,7 @@ func (c *Client) GenerateCoinAddress(currency string) (GenerateCoinAddressRespon
 // GetWithdraws: 출금 리스트 조회
 func (c *Client) GetWithdraws(params RequestParams) ([]Deposit, error) {
 	var res []Deposit
-	err := c.doRequest("GET", "withdraws", params, &res) // C# 코드는 deposits를 호출하지만 이름이 GetWithdraws임. API 스펙상 출금은 /withdraws
-	// 주의: 원본 C# 코드의 GetWithdraws는 endpoint가 "deposits"로 되어있습니다.
-	// 의도대로라면 "withdraws"여야 하나, C# 코드를 그대로 포팅하려면 "deposits"를 써야 합니다.
-	// 여기서는 올바른 API인 "withdraws"를 쓰거나 C#대로 "deposits"를 쓸지 결정해야 합니다.
-	// 위 코드는 메서드 명에 맞춰 수정됨. 원본 C# 동작을 원하면 "deposits"로 변경하세요.
+	err := c.doRequest("GET", "withdraws", params, &res)
 	return res, err
 }
 
