@@ -33,21 +33,21 @@ type Account struct {
 }
 
 type Order struct {
-	Uuid            string  `json:"uuid"`
-	Side            string  `json:"side"`
-	OrdType         string  `json:"ord_type"`
-	Price           string  `json:"price"`
-	State           string  `json:"state"`
-	Market          string  `json:"market"`
-	CreatedAt       string  `json:"created_at"`
-	Volume          string  `json:"volume"`
-	RemainingVolume string  `json:"remaining_volume"`
-	ReservedFee     string  `json:"reserved_fee"`
-	RemainingFee    string  `json:"remaining_fee"`
-	PaidFee         string  `json:"paid_fee"`
-	Locked          string  `json:"locked"`
-	ExecutedVolume  string  `json:"executed_volume"`
-	TradesCount     int     `json:"trades_count"`
+	Uuid            string  `json:"uuid" jsonschema:"Unique identifier (UUID) for the order."`
+	Side            string  `json:"side" jsonschema:"Order side: ask (sell), bid (buy)."`
+	OrdType         string  `json:"ord_type" jsonschema:"Order type to create. (limit: Limit buy/sell order, price: market buy order, market: market sell order)"`
+	Price           string  `json:"price" jsonschema:"Order unit price or total amount. For limit orders, this is the unit price. For market buy orders, this is the total purchase amount."`
+	State           string  `json:"state" jsonschema:"Order status. (done, cancel)"`
+	Market          string  `json:"market" jsonschema:"Trading pair code representing the market"`
+	CreatedAt       string  `json:"created_at" jsonschema:"Order creation time in KST [Format] yyyy-MM-ddTHH:mm:ss+09:00"`
+	Volume          string  `json:"volume" jsonschema:"Order request amount or quantity."`
+	RemainingVolume string  `json:"remaining_volume" jsonschema:"Remaining order quantity after execution."`
+	ExecutedVolume  string  `json:"executed_volume" jsonschema:"Executed order quantity."`
+	ReservedFee     string  `json:"reserved_fee" jsonschema:"Fee amount reserved for the order."`
+	RemainingFee    string  `json:"remaining_fee" jsonschema:"Fee amount reserved for the order."`
+	PaidFee         string  `json:"paid_fee" jsonschema:"Fee amount paid at the time of execution."`
+	Locked          string  `json:"locked" jsonschema:"Amount or quantity locked by pending orders or trades."`
+	TradesCount     int     `json:"trades_count" jsonschema:"Number of trades executed for the order."`
 	Trades          []Trade `json:"trades,omitempty"` // 상세 조회 시에만 존재
 }
 
@@ -161,37 +161,53 @@ type OrderBookUnit struct {
 }
 
 type Chance struct {
-	BidFee     string        `json:"bid_fee"`
-	AskFee     string        `json:"ask_fee"`
-	Market     ChanceMarket  `json:"market"`
-	BidAccount ChanceAccount `json:"bid_account"`
-	AskAccount ChanceAccount `json:"ask_account"`
+	BidFee      string       `json:"bid_fee" jsonschema:"Fee rate applied to buy orders."`
+	AskFee      string       `json:"ask_fee" jsonschema:"Fee rate applied to sell orders"`
+	MakerBidFee string       `json:"maker_bid_fee" jsonschema:"Fee rate for buy maker orders."`
+	MakerAskFee string       `json:"maker_ask_fee" jsonschema:"Fee rate for sell maker orders."`
+	Market      ChanceMarket `json:"market"`
+	BidAccount  BidAccount   `json:"bid_account"`
+	AskAccount  AskAccount   `json:"ask_account"`
 }
 
 type ChanceMarket struct {
-	Id         string      `json:"id"`
-	Name       string      `json:"name"`
-	OrderTypes []string    `json:"order_types"`
-	OrderSides []string    `json:"order_sides"`
-	Bid        ChanceLimit `json:"bid"`
-	Ask        ChanceLimit `json:"ask"`
-	MaxTotal   string      `json:"max_total"`
-	State      string      `json:"state"`
+	Id         string         `json:"id" jsonschema:"Trading pair code representing the market. e.g. KRW-BTC"`
+	Name       string         `json:"name" jsonschema:"Trading pair code in the format (base asset)/(quote asset)."`
+	OrderSides []string       `json:"order_sides" jsonschema:"Supported order sides: 'bid' (buy), 'ask' (sell)."`
+	BidTypes   []string       `json:"bid_types" jsonschema:"Supported buy order types."`
+	AskTypes   []string       `json:"ask_types" jsonschema:"Supported sell order types."`
+	Bid        BidChanceLimit `json:"bid" jsonschema:"Bid constraints"`
+	Ask        AskChanceLimit `json:"ask" jsonschema:"Ask constraints"`
+	MaxTotal   string         `json:"max_total" jsonschema:"Maximum available order amount."`
+	State      string         `json:"state" jsonschema:"Trading pair operation status."`
 }
 
-type ChanceLimit struct {
-	Currency  string      `json:"currency"`
-	PriceUnit interface{} `json:"price_unit"`
-	MinTotal  int         `json:"min_total"`
+type BidChanceLimit struct {
+	Currency string `json:"currency" jsonschema:"디지털 자산 구매에 사용되는 통화(KRW,BTC,USDT)"`
+	MinTotal string `json:"min_total" jsonschema:"매수 시 최소 주문 금액(결제 화폐 기준) [예시] min_total: 5000일 경우, 5000 KRW를 의미합니다."`
 }
 
-type ChanceAccount struct {
-	Currency            string `json:"currency"`
-	Balance             string `json:"balance"`
-	Locked              string `json:"locked"`
-	AvgBuyPrice         string `json:"avg_buy_price"`
-	AvgBuyPriceModified bool   `json:"avg_buy_price_modified"`
-	UnitCurrency        string `json:"unit_currency"`
+type AskChanceLimit struct {
+	Currency string `json:"currency" jsonschema:"매도 자산 통화 e.g. BTC, ETH"`
+	MinTotal string `json:"min_total" jsonschema:"매도 시 최소 주문 금액 ([예시] min_total: 5000일 경우, 5000 KRW를 의미합니다."`
+}
+
+type BidAccount struct {
+	Currency            string `json:"currency" jsonschema:"Currency code to be queried."`
+	Balance             string `json:"balance" jsonschema:"Available amount or volume for orders. For digital assets, this represents the available quantity. For fiat currency, this represents the available amount."`
+	Locked              string `json:"locked" jsonschema:"Amount or quantity locked by pending orders or withdrawals."`
+	AvgBuyPrice         string `json:"avg_buy_price" jsonschema:"Average buy price of the asset."`
+	AvgBuyPriceModified bool   `json:"avg_buy_price_modified" jsonschema:"Indicates whether the average buy price has been modified."`
+	UnitCurrency        string `json:"unit_currency" jsonschema:"Currency unit used as the basis for avg_buy_price. [Example] KRW, BTC, USDT"`
+}
+
+type AskAccount struct {
+	Currency            string `json:"currency" jsonschema:"Currency code to be queried."`
+	Balance             string `json:"balance" jsonschema:"Available amount or volume for orders. For digital assets, this represents the available quantity. For fiat currency, this represents the available amount."`
+	Locked              string `json:"locked" jsonschema:"Amount or quantity locked by pending orders or withdrawals."`
+	AvgBuyPrice         string `json:"avg_buy_price" jsonschema:"Average buy price of the asset."`
+	AvgBuyPriceModified bool   `json:"avg_buy_price_modified" jsonschema:"Indicates whether the average buy price has been modified."`
+	UnitCurrency        string `json:"unit_currency" jsonschema:"Currency unit used as the basis for avg_buy_price. [Example] KRW, BTC, USDT"`
 }
 
 type Tick struct {

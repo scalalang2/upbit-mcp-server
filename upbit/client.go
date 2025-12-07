@@ -47,10 +47,10 @@ func (c *Client) GetOrder(uuid string) (Order, error) {
 	return res, err
 }
 
-// GetOrders: 주문 리스트 조회 (Open, Wait 등)
-func (c *Client) GetOrders(params RequestParams) ([]Order, error) {
+// GetOpenOrders: 진행중인 주문 리스트 조회
+func (c *Client) GetOpenOrders(params RequestParams) ([]Order, error) {
 	var res []Order
-	err := c.doRequest("GET", "orders", params, &res)
+	err := c.doRequest("GET", "orders/open", params, &res)
 	return res, err
 }
 
@@ -90,14 +90,6 @@ func (c *Client) GetCoinAddress(currency string) (CoinAddress, error) {
 	var res CoinAddress
 	params := RequestParams{Currency: currency}
 	err := c.doRequest("GET", "deposits/coin_address", params, &res)
-	return res, err
-}
-
-// GenerateCoinAddress: 입금 주소 생성 요청
-func (c *Client) GenerateCoinAddress(currency string) (GenerateCoinAddressResponse, error) {
-	var res GenerateCoinAddressResponse
-	params := RequestParams{Currency: currency}
-	err := c.doRequest("POST", "deposits/generate_coin_address", params, &res)
 	return res, err
 }
 
