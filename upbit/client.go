@@ -3,6 +3,8 @@ package upbit
 import (
 	"fmt"
 	"net/http"
+	"sort"
+	"strings"
 	"time"
 )
 
@@ -172,4 +174,73 @@ func (c *Client) GetMinuteCandles(unit int, params RequestParams) ([]Candle, err
 	endpoint := fmt.Sprintf("candles/minutes/%d", unit)
 	err := c.doNonAuthRequest(endpoint, params, &res)
 	return res, err
+}
+
+// GetMarkets: 마켓 코드 조회
+func (c *Client) GetMarkets() ([]MarketInfo, error) {
+	var res []MarketInfo
+	err := c.doNonAuthRequest("market/all", nil, &res)
+	return res, err
+}
+
+// GetMarketTrends: 상승률/거래량 Top 10 조회
+func (c *Client) GetMarketTrends(limit int) (*MarketTrends, error) {
+	markets, err := c.GetMarkets()
+	if err != nil {
+		return nil, err
+	}
+
+	var marketCodes []string
+	for _, m := range markets {
+		if strings.HasPrefix(m.Market, "KRW-") {
+			marketCodes = append(marketCodes, m.Market)
+		}
+	}
+
+	tickers, err := c.GetTicker(strings.Join(marketCodes, ","))
+	if err != nil {
+		return nil, err
+	}
+
+	var trendInfos []MarketTrendInfo
+	for _, t := range tickers {
+		trendInfos = append(trendInfos, MarketTrendInfo{
+			Market:      t.Market,
+			ChangeRate:  t.SignedChangeRate,
+			TradeVolume: t.AccTradeVolume24h,
+		})
+	}
+
+	// Sort by change rate (top gainers)
+	sort.Slice(trendInfos, func(i, j int) bool {
+		return trendInfos[i].ChangeRate > trendInfos[j].ChangeRate
+	})
+	topGainers := trendInfos
+	if len(topGainers) > limit {
+		topGainers = topGainers[:limit]
+	}
+
+	sort.Slice(trendInfos, func(i, j int) bool {
+		return trendInfos[i].ChangeRate < trendInfos[j].ChangeRate
+	})
+
+	topLosers := trendInfos
+	if len(topLosers) > limit {
+		topLosers = topLosers[:limit]
+	}
+
+	// Sort by trade volume
+	sort.Slice(trendInfos, func(i, j int) bool {
+		return trendInfos[i].TradeVolume > trendInfos[j].TradeVolume
+	})
+	topVolume := trendInfos
+	if len(topVolume) > limit {
+		topVolume = topVolume[:limit]
+	}
+
+	return &MarketTrends{
+		TopVolume:  topVolume,
+		TopGainers: topGainers,
+		TopLosers:  topLosers,
+	}, nil
 }

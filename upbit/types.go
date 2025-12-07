@@ -215,3 +215,25 @@ type Tick struct {
 	ChangePrice      float64 `json:"change_price"`
 	AskBid           string  `json:"ask_bid"`
 }
+
+type MarketTrendInfo struct {
+	Market       string  `json:"market"`
+	ChangeRate   float64 `json:"change_rate"`
+	TradeVolume  float64 `json:"trade_volume"`
+	OpeningPrice float64 `json:"opening_price"`
+	HighPrice    float64 `json:"high_price"`
+	LowPrice     float64 `json:"low_price"`
+	TradePrice   float64 `json:"trade_price"`
+}
+
+type MarketTrends struct {
+	TopVolume  []MarketTrendInfo `json:"top_volume" jsonschema:"Top 10 market bt trading volume"`
+	TopGainers []MarketTrendInfo `json:"top_gainers" jsonschema:"Top 10 gainer markets"`
+	TopLosers  []MarketTrendInfo `json:"top_losers" jsonschema:"Top 10 loser markets"`
+}
+
+type MarketInfo struct {
+	Market      string `json:"market"`
+	KoreanName  string `json:"korean_name"`
+	EnglishName string `json:"english_name"`
+}

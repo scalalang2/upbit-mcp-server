@@ -10,6 +10,16 @@ import (
 )
 
 func main() {
+	getAvailableOrderInfoDescription := `Retrieves the order availability information for the specified pair. 
+		The response doesn't include current trading pair prices 
+		you should consider the current price if you want to decide whether to buy or sell.`
+	getClosedOrderHistoryDescription := `Retrieves the order availability information for the specified pair. 
+				The response doesn't include current trading pair prices 
+				you should consider the current price if you want to decide whether to buy or sell.`
+	getOpenOrdersDescription := `Retrieves the order availability information for the specified pair. 
+				The response doesn't include current trading pair prices 
+				you should consider the current price if you want to decide whether to buy or sell.`
+
 	server := mcp.NewServer(&mcp.Implementation{
 		Name:    "greeter",
 		Version: "v1.0.0",
@@ -34,28 +44,11 @@ func main() {
 	mcp.AddTool(server, &mcp.Tool{Name: "PlaceSellOrderByMarket", Description: "시장가 매도 주문하기"}, PlaceSellOrderByMarket)
 	mcp.AddTool(server, &mcp.Tool{Name: "CancelOrder", Description: "주문 취소하기"}, CancelOrder)
 
-	mcp.AddTool(server, &mcp.Tool{
-		Name: "GetAvailableOrderInfo",
-		Description: `Retrieves the order availability information for the specified pair. 
-				The response doesn't include current trading pair prices 
-				you should consider the current price if you want to decide whether to buy or sell.`,
-	}, GetAvailableOrderInfo)
-
-	mcp.AddTool(server, &mcp.Tool{
-		Name: "GetClosedOrderHistory",
-		Description: `Retrieves the order availability information for the specified pair. 
-				The response doesn't include current trading pair prices 
-				you should consider the current price if you want to decide whether to buy or sell.`,
-	}, GetClosedOrderHistory)
-
-	mcp.AddTool(server, &mcp.Tool{
-		Name: "GetOpenOrders",
-		Description: `Retrieves the order availability information for the specified pair. 
-				The response doesn't include current trading pair prices 
-				you should consider the current price if you want to decide whether to buy or sell.`,
-	}, GetOpenOrders)
-	
+	mcp.AddTool(server, &mcp.Tool{Name: "GetAvailableOrderInfo", Description: getAvailableOrderInfoDescription}, GetAvailableOrderInfo)
+	mcp.AddTool(server, &mcp.Tool{Name: "GetClosedOrderHistory", Description: getClosedOrderHistoryDescription}, GetClosedOrderHistory)
+	mcp.AddTool(server, &mcp.Tool{Name: "GetOpenOrders", Description: getOpenOrdersDescription}, GetOpenOrders)
 	mcp.AddTool(server, &mcp.Tool{Name: "GetMarketSummary", Description: "Summarized multiple market information"}, GetMarketSummary)
+	mcp.AddTool(server, &mcp.Tool{Name: "GetMarketTrends", Description: "Get market trends, top 10 market by volume, top 10 gainers and top 10 losers"}, GetMarketTrends)
 
 	log.Println("MCP server started")
 	if err := server.Run(ctx, &mcp.StdioTransport{}); err != nil {

@@ -81,10 +81,6 @@ type GetTradingPairRequest struct {
 	OnlyKrwMarkets bool     `json:"only_krw_markets" jsonschema:"If this enabled, then it returns only KRW(won) markets."`
 }
 
-type GetTradingPairResult struct {
-	TradingPairs []upbit.MarketTradingPair `json:"trading_pairs"`
-}
-
 type GetMarketSummaryRequest struct {
 	Markets []string `json:"market" jsonschema:"Trading pair code representing the market (e.g. KRW-BTC, KRW-ETH ...)"`
 }
@@ -310,55 +306,6 @@ func GetOpenOrders(ctx context.Context, req *mcp.CallToolRequest, params *GetOpe
 	return &res, &GetOpenOrderHistoryResult{Orders: orderHistory}, nil
 }
 
-func GetAvailableMarketCodesAndStatus(ctx context.Context, req *mcp.CallToolRequest, params *GetTradingPairRequest) (
-	*mcp.CallToolResult,
-	*GetTradingPairResult,
-	error,
-) {
-	var res mcp.CallToolResult
-
-	client, ok := ctx.Value(upbitClientKey{}).(*upbit.Client)
-	if !ok {
-		return nil, nil, fmt.Errorf("Upbit client not found in context")
-	}
-
-	tradingPairs, err := client.ListAllTradingPairs()
-	if err != nil {
-		return nil, nil, err
-	}
-
-	// Filter markets
-	if len(params.Markets) > 0 {
-		filteredPairs := []upbit.MarketTradingPair{}
-		M := make(map[string]bool)
-		for _, market := range params.Markets {
-			M[market] = true
-		}
-
-		for _, pair := range tradingPairs {
-			if M[pair.Market] {
-				filteredPairs = append(filteredPairs, pair)
-			}
-		}
-		tradingPairs = filteredPairs
-	}
-
-	// Filter only (won) markets
-	if params.OnlyKrwMarkets {
-		filteredPairs := []upbit.MarketTradingPair{}
-		for _, pair := range tradingPairs {
-			if strings.HasPrefix(pair.Market, "KRW-") {
-				filteredPairs = append(filteredPairs, pair)
-			}
-		}
-		tradingPairs = filteredPairs
-	}
-
-	return &res, &GetTradingPairResult{
-		TradingPairs: tradingPairs,
-	}, nil
-}
-
 func GetMarketSummary(ctx context.Context, req *mcp.CallToolRequest, params *GetMarketSummaryRequest) (
 	*mcp.CallToolResult,
 	*GetMarketSummaryResult,
@@ -379,4 +326,24 @@ func GetMarketSummary(ctx context.Context, req *mcp.CallToolRequest, params *Get
 	}
 
 	return &res, &GetMarketSummaryResult{Ticker: ticker}, nil
+}
+
+func GetMarketTrends(ctx context.Context, req *mcp.CallToolRequest, params any) (
+	*mcp.CallToolResult,
+	*upbit.MarketTrends,
+	error,
+) {
+	client, ok := ctx.Value(upbitClientKey{}).(*upbit.Client)
+	if !ok {
+		return nil, nil, fmt.Errorf("Upbit client not found in context")
+	}
+
+	var res mcp.CallToolResult
+
+	marketTrends, err := client.GetMarketTrends(10)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return &res, marketTrends, nil
 }

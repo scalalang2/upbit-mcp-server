@@ -11,14 +11,18 @@
   - `GetClosedOrderHistory`: 완료된 주문 조회
   - `GetOpenOrderList`: 현재 진행중인 주문 리스트
 - 시장 데이터 조회
-  - `GetAvailableMarketCodesAndStatus`: 마켓 코드 및 상태 조회
-  - `GetMarketSummary`: 시장 정보 조회
-  - `GetRecentTradesByMarket`: 마켓에서 최근 체결 내역 조회
-  - `GetOrderBooks`: 호가 정보
+  - `GetMarketSummary`: 특정 시장 정보 조회
+  - `GetMarketTrends`: 
   - `GetDayCandles`: 일봉
   - `GetWeekCandles`: 주봉
   - `GetMonthCandles`: 월봉
   - `GetMinuteCandles`: 분봉
+- 기술적 분석 지표
+  - 이동 평균선
+  - MACD
+  - RSI
+  - Bollinger Bands
+  - ODV
 
 ## MCP 연동 방법
 ```json
