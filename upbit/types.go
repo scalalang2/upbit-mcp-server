@@ -24,12 +24,12 @@ type RequestParams struct {
 }
 
 type Account struct {
-	Currency            string `json:"currency"`
-	Balance             string `json:"balance"`
-	Locked              string `json:"locked"`
-	AvgBuyPrice         string `json:"avg_buy_price"`
-	AvgBuyPriceModified bool   `json:"avg_buy_price_modified"`
-	UnitCurrency        string `json:"unit_currency"`
+	Currency            string `json:"currency" jsonschema:"Currency code to be queried"`
+	Balance             string `json:"balance" jsonschema:"Available amount or volume for orders. For digital assets, this represents the available quantity. For fiat currency, this represents the available amount"`
+	Locked              string `json:"locked" jsonschema:"Amount or quantity locked by pending orders or withdrawals"`
+	AvgBuyPrice         string `json:"avg_buy_price" jsonschema:"Average buy price of the asset"`
+	AvgBuyPriceModified bool   `json:"avg_buy_price_modified" jsonschema:"Indicates whether the average buy price has been modified"`
+	UnitCurrency        string `json:"unit_currency" jsonschema:"Currency unit used as the basis for avg_buy_price. [Example] KRW, BTC, USDT"`
 }
 
 type Order struct {
@@ -58,11 +58,6 @@ type Trade struct {
 	Volume string `json:"volume"`
 	Funds  string `json:"funds"`
 	Side   string `json:"side"`
-}
-
-type ApiKey struct {
-	AccessKey string `json:"access_key"`
-	ExpireAt  string `json:"expire_at"`
 }
 
 type WalletStatus struct {

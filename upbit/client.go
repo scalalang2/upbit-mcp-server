@@ -131,15 +131,6 @@ func (c *Client) GetWalletStatus() ([]WalletStatus, error) {
 	return res, err
 }
 
-// GetApiKeys: API 키 리스트 조회
-func (c *Client) GetApiKeys() ([]ApiKey, error) {
-	var res []ApiKey
-	err := c.doRequest("GET", "api_keys", nil, &res)
-	return res, err
-}
-
-// --- Quotation API (Non-Auth) ---
-
 // GetMarketCodes: 마켓 코드 조회
 func (c *Client) GetMarketCodes() ([]MarketCode, error) {
 	var res []MarketCode
