@@ -4,7 +4,8 @@
 ## 지원 기능
 - 계정 관련 도구
   - `GetAccounts`: 전체 계좌 조회
-  - `PlaceOrder`: 주문하기
+  - `PlaceBuyOrder`: 시장가/지정가 매수 주문하기
+  - `PlaceSellOrder`: 시장가/지정가 매도 주문하기
   - `CancelOrder`: 주문 취소
   - `GetAvailableOrderInfo`: 마켓 단위로 주문 가능 정보 확인
   - `GetClosedOrderHistory`: 완료된 주문 조회

@@ -41,6 +41,28 @@ type GetOpenOrderHistoryResult struct {
 	Orders []upbit.Order `json:"orders"`
 }
 
+type PlaceBuyOrderByLimitRequest struct {
+	Market string `json:"market" jsonschema:"Trading pair code representing the market."`
+	Price  string `json:"price" jsonschema:"Order price based on the quote currency. e.g. when buying 1 BTC at 100,000,000 KRW per BTC in the KRW-BTC market, enter 100000000."`
+	Volume string `json:"volume" jsonschema:"Order quantity. e.g. to buy 0.1 BTC in the KRW-BTC market, enter 0.1"`
+}
+
+type PlaceBuyOrderByMarketRequest struct {
+	Market string `json:"market" jsonschema:"Trading pair code representing the market."`
+	Price  string `json:"price" jsonschema:"Total order amount based on the quote currency. For example, entering 100000000 in the KRW-BTC pair will buy BTC worth 100,000,000 KRW at market price."`
+}
+
+type PlaceSellOrderByLimitRequest struct {
+	Market string `json:"market" jsonschema:"Trading pair code representing the market."`
+	Price  string `json:"price" jsonschema:"Order price based on the quote currency. For example, when selling 1 BTC at 100,000,000 KRW per BTC in the KRW-BTC market, enter 100000000."`
+	Volume string `json:"volume" jsonschema:"Order quantity e.g. to sell 0.1 BTC in the KRW-BTC market, enter 0.1"`
+}
+
+type PlaceSellOrderByMarketRequest struct {
+	Market string `json:"market" jsonschema:"Trading pair code representing the market."`
+	Volume string `json:"volume" jsonschema:"Sell order quantity. For example, entering 0.1 in the KRW-BTC pair will sell 0.1 BTC at market price"`
+}
+
 func AddUpbitTools(server *mcp.Server, client *upbit.Client) {
 	mcp.AddTool(
 		server,
@@ -65,16 +87,23 @@ func AddUpbitTools(server *mcp.Server, client *upbit.Client) {
 	mcp.AddTool(
 		server,
 		&mcp.Tool{
-			Name:        "PlaceBuyOrder",
-			Description: "지정가/시장가 매수 주문하기"},
-		func(ctx context.Context, req *mcp.CallToolRequest, params any) (
+			Name:        "PlaceBuyOrderByLimit",
+			Description: "지정가 매수 주문하기"},
+		func(ctx context.Context, req *mcp.CallToolRequest, params PlaceBuyOrderByLimitRequest) (
 			*mcp.CallToolResult,
 			*upbit.Order,
 			error,
 		) {
 			var res mcp.CallToolResult
 
-			orderResult, err := client.PlaceOrder()
+			orderResult, err := client.PlaceOrder(upbit.RequestParams{
+				Market:  params.Market,
+				Side:    "bid",
+				OrdType: "limit",
+				Price:   params.Price,
+				Volume:  params.Volume,
+				SmpType: "cancel_maker",
+			})
 			if err != nil {
 				return nil, nil, err
 			}
@@ -85,16 +114,75 @@ func AddUpbitTools(server *mcp.Server, client *upbit.Client) {
 	mcp.AddTool(
 		server,
 		&mcp.Tool{
-			Name:        "PlaceSellOrder",
-			Description: "지정가/시장가 매도 주문하기"},
-		func(ctx context.Context, req *mcp.CallToolRequest, params any) (
+			Name:        "PlaceBuyOrderByMarket",
+			Description: "시장가 매수 주문하기"},
+		func(ctx context.Context, req *mcp.CallToolRequest, params PlaceBuyOrderByMarketRequest) (
 			*mcp.CallToolResult,
 			*upbit.Order,
 			error,
 		) {
 			var res mcp.CallToolResult
 
-			orderResult, err := client.PlaceOrder()
+			orderResult, err := client.PlaceOrder(upbit.RequestParams{
+				Market:  params.Market,
+				Side:    "bid",
+				OrdType: "price",
+				Price:   params.Price,
+				SmpType: "cancel_maker",
+			})
+			if err != nil {
+				return nil, nil, err
+			}
+
+			return &res, &orderResult, nil
+		})
+
+	mcp.AddTool(
+		server,
+		&mcp.Tool{
+			Name:        "PlaceSellOrderByLimit",
+			Description: "지정가 매도 주문하기"},
+		func(ctx context.Context, req *mcp.CallToolRequest, params PlaceSellOrderByLimitRequest) (
+			*mcp.CallToolResult,
+			*upbit.Order,
+			error,
+		) {
+			var res mcp.CallToolResult
+
+			orderResult, err := client.PlaceOrder(upbit.RequestParams{
+				Market:  params.Market,
+				Side:    "ask",
+				OrdType: "limit",
+				Price:   params.Price,
+				Volume:  params.Volume,
+				SmpType: "cancel_maker",
+			})
+			if err != nil {
+				return nil, nil, err
+			}
+
+			return &res, &orderResult, nil
+		})
+
+	mcp.AddTool(
+		server,
+		&mcp.Tool{
+			Name:        "PlaceSellOrderByMarket",
+			Description: "시장가 매도 주문하기"},
+		func(ctx context.Context, req *mcp.CallToolRequest, params PlaceSellOrderByMarketRequest) (
+			*mcp.CallToolResult,
+			*upbit.Order,
+			error,
+		) {
+			var res mcp.CallToolResult
+
+			orderResult, err := client.PlaceOrder(upbit.RequestParams{
+				Market:  params.Market,
+				Side:    "ask",
+				OrdType: "market",
+				Volume:  params.Volume,
+				SmpType: "cancel_maker",
+			})
 			if err != nil {
 				return nil, nil, err
 			}

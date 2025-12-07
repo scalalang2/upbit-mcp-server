@@ -21,6 +21,7 @@ type RequestParams struct {
 	DaysAgo             int    `json:"daysAgo,omitempty"`
 	Unit                int    `json:"unit,omitempty"`
 	ConvertingPriceUnit string `json:"convertingPriceUnit,omitempty"`
+	SmpType             string `json:"smp_type,omitempty"`
 }
 
 type Account struct {
