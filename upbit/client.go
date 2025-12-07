@@ -123,9 +123,9 @@ func (c *Client) GetWalletStatus() ([]WalletStatus, error) {
 	return res, err
 }
 
-// GetMarketCodes: 마켓 코드 조회
-func (c *Client) GetMarketCodes() ([]MarketCode, error) {
-	var res []MarketCode
+// ListAllTradingPairs: 전체 마켓 코드와 마켓별 운용 상태를 조회합니다.
+func (c *Client) ListAllTradingPairs() ([]MarketTradingPair, error) {
+	var res []MarketTradingPair
 	err := c.doNonAuthRequest("market/all", map[string]string{"isDetails": "true"}, &res)
 	return res, err
 }

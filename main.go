@@ -55,6 +55,9 @@ func main() {
 				you should consider the current price if you want to decide whether to buy or sell.`,
 	}, GetOpenOrders)
 
+	mcp.AddTool(server, &mcp.Tool{Name: "GetTradingPairs", Description: "List all trading pairs and their operating status"}, GetTradingPairs)
+	mcp.AddTool(server, &mcp.Tool{Name: "GetMarketSummary", Description: "Summarized multiple market information"}, GetMarketSummary)
+
 	log.Println("MCP server started")
 	if err := server.Run(ctx, &mcp.StdioTransport{}); err != nil {
 		log.Fatal(err)
