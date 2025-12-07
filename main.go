@@ -54,8 +54,7 @@ func main() {
 				The response doesn't include current trading pair prices 
 				you should consider the current price if you want to decide whether to buy or sell.`,
 	}, GetOpenOrders)
-
-	mcp.AddTool(server, &mcp.Tool{Name: "GetTradingPairs", Description: "List all trading pairs and their operating status"}, GetTradingPairs)
+	
 	mcp.AddTool(server, &mcp.Tool{Name: "GetMarketSummary", Description: "Summarized multiple market information"}, GetMarketSummary)
 
 	log.Println("MCP server started")

@@ -139,26 +139,6 @@ type Candle struct {
 	Unit                 int     `json:"unit,omitempty"`
 }
 
-type MarketTradingPair struct {
-	Market      string        `json:"market"`
-	KoreanName  string        `json:"korean_name"`
-	EnglishName string        `json:"english_name"`
-	MarketEvent []MarketEvent `json:"market_warning"`
-}
-
-type MarketEvent struct {
-	Warning bool          `json:"warning" jsonschema:"Whether the pair has been designated as an 'Investment Caution'' item under Upbit’s market alert system"`
-	Caution MarketCaution `json:"caution"`
-}
-
-type MarketCaution struct {
-	PriceFluctuations            bool `json:"PRICE_FLUCTUATIONS" jsonschema:"Price Surge/Drop Alert"`
-	TradingVolumeSoaring         bool `json:"TRADING_VOLUME_SOARING" jsonschema:"Trading Volume Surge Alert"`
-	DepositAmountSoaring         bool `json:"DEPOSIT_AMOUNT_SOARING" jsonschema:"Deposit Volume Surge Alert"`
-	GlobalPriceDifferences       bool `json:"GLOBAL_PRICE_DIFFERENCES" jsonschema:"Domestic and International Price Difference Alert"`
-	ConcentrationOfSmallAccounts bool `json:"CONCENTRATION_OF_SMALL_ACCOUNTS" jsonschema:"Concentrated Trading by a Small Number of Accounts Alert"`
-}
-
 type OrderBook struct {
 	Market         string          `json:"market"`
 	Timestamp      int64           `json:"timestamp"`

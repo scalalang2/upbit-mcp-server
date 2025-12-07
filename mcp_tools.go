@@ -81,6 +81,10 @@ type GetTradingPairRequest struct {
 	OnlyKrwMarkets bool     `json:"only_krw_markets" jsonschema:"If this enabled, then it returns only KRW(won) markets."`
 }
 
+type GetTradingPairResult struct {
+	TradingPairs []upbit.MarketTradingPair `json:"trading_pairs"`
+}
+
 type GetMarketSummaryRequest struct {
 	Markets []string `json:"market" jsonschema:"Trading pair code representing the market (e.g. KRW-BTC, KRW-ETH ...)"`
 }
@@ -306,9 +310,9 @@ func GetOpenOrders(ctx context.Context, req *mcp.CallToolRequest, params *GetOpe
 	return &res, &GetOpenOrderHistoryResult{Orders: orderHistory}, nil
 }
 
-func GetTradingPairs(ctx context.Context, req *mcp.CallToolRequest, params GetTradingPairRequest) (
+func GetAvailableMarketCodesAndStatus(ctx context.Context, req *mcp.CallToolRequest, params *GetTradingPairRequest) (
 	*mcp.CallToolResult,
-	*[]upbit.MarketTradingPair,
+	*GetTradingPairResult,
 	error,
 ) {
 	var res mcp.CallToolResult
@@ -350,7 +354,9 @@ func GetTradingPairs(ctx context.Context, req *mcp.CallToolRequest, params GetTr
 		tradingPairs = filteredPairs
 	}
 
-	return &res, &tradingPairs, nil
+	return &res, &GetTradingPairResult{
+		TradingPairs: tradingPairs,
+	}, nil
 }
 
 func GetMarketSummary(ctx context.Context, req *mcp.CallToolRequest, params *GetMarketSummaryRequest) (

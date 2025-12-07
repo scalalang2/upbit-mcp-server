@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -28,6 +29,23 @@ func structToMap(item interface{}) map[string]string {
 	if v.Kind() == reflect.Ptr {
 		v = v.Elem()
 	}
+
+	// item이 map 타입일 경우 처리
+	if v.Kind() == reflect.Map {
+		for _, key := range v.MapKeys() {
+			strKey := fmt.Sprintf("%v", key.Interface())
+			strVal := fmt.Sprintf("%v", v.MapIndex(key).Interface())
+			res[strKey] = strVal
+		}
+		return res
+	}
+
+	// item이 struct가 아니면..?
+	if v.Kind() != reflect.Struct {
+		log.Panic(`"item is not a struct or map type"`)
+	}
+
+	// item이 struct 타입일 경우 처리
 	typeOfS := v.Type()
 	for i := 0; i < v.NumField(); i++ {
 		field := typeOfS.Field(i)
