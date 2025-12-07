@@ -67,6 +67,14 @@ type PlaceSellOrderByMarketRequest struct {
 	Volume string `json:"volume" jsonschema:"Sell order quantity. For example, entering 0.1 in the KRW-BTC pair will sell 0.1 BTC at market price"`
 }
 
+type CancelOrderRequest struct {
+	UUID string `json:"uuid" jsonschema:"Unique identifier (UUID) for the order to cancel."`
+}
+
+type CancelOrderResult struct {
+	Canceled bool `json:"canceled" jsonschema:"Whether the order is canceled or not"`
+}
+
 func GetAccounts(ctx context.Context, req *mcp.CallToolRequest, params any) (
 	*mcp.CallToolResult,
 	*GetAccountsResult,
@@ -87,7 +95,7 @@ func GetAccounts(ctx context.Context, req *mcp.CallToolRequest, params any) (
 	return &res, &GetAccountsResult{Accounts: accounts}, nil
 }
 
-func PlaceBuyOrderByLimit(ctx context.Context, req *mcp.CallToolRequest, params PlaceBuyOrderByLimitRequest) (
+func PlaceBuyOrderByLimit(ctx context.Context, req *mcp.CallToolRequest, params *PlaceBuyOrderByLimitRequest) (
 	*mcp.CallToolResult,
 	*upbit.Order,
 	error,
@@ -114,7 +122,7 @@ func PlaceBuyOrderByLimit(ctx context.Context, req *mcp.CallToolRequest, params 
 	return &res, &orderResult, nil
 }
 
-func PlaceBuyOrderByMarket(ctx context.Context, req *mcp.CallToolRequest, params PlaceBuyOrderByMarketRequest) (
+func PlaceBuyOrderByMarket(ctx context.Context, req *mcp.CallToolRequest, params *PlaceBuyOrderByMarketRequest) (
 	*mcp.CallToolResult,
 	*upbit.Order,
 	error,
@@ -140,7 +148,7 @@ func PlaceBuyOrderByMarket(ctx context.Context, req *mcp.CallToolRequest, params
 	return &res, &orderResult, nil
 }
 
-func PlaceSellOrderByLimit(ctx context.Context, req *mcp.CallToolRequest, params PlaceSellOrderByLimitRequest) (
+func PlaceSellOrderByLimit(ctx context.Context, req *mcp.CallToolRequest, params *PlaceSellOrderByLimitRequest) (
 	*mcp.CallToolResult,
 	*upbit.Order,
 	error,
@@ -167,7 +175,7 @@ func PlaceSellOrderByLimit(ctx context.Context, req *mcp.CallToolRequest, params
 	return &res, &orderResult, nil
 }
 
-func PlaceSellOrderByMarket(ctx context.Context, req *mcp.CallToolRequest, params PlaceSellOrderByMarketRequest) (
+func PlaceSellOrderByMarket(ctx context.Context, req *mcp.CallToolRequest, params *PlaceSellOrderByMarketRequest) (
 	*mcp.CallToolResult,
 	*upbit.Order,
 	error,
@@ -193,9 +201,9 @@ func PlaceSellOrderByMarket(ctx context.Context, req *mcp.CallToolRequest, param
 	return &res, &orderResult, nil
 }
 
-func CancelOrder(ctx context.Context, req *mcp.CallToolRequest, params any) (
+func CancelOrder(ctx context.Context, req *mcp.CallToolRequest, params *CancelOrderRequest) (
 	*mcp.CallToolResult,
-	*GetAccountsResult,
+	*CancelOrderResult,
 	error,
 ) {
 	var res mcp.CallToolResult
@@ -205,15 +213,15 @@ func CancelOrder(ctx context.Context, req *mcp.CallToolRequest, params any) (
 		return nil, nil, fmt.Errorf("Upbit client not found in context")
 	}
 
-	accounts, err := client.GetAccounts()
+	canceled, err := client.CancelOrder(params.UUID)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	return &res, &GetAccountsResult{Accounts: accounts}, nil
+	return &res, &CancelOrderResult{Canceled: canceled}, nil
 }
 
-func GetAvailableOrderInfo(ctx context.Context, req *mcp.CallToolRequest, params GetAvailableOrderInfoRequest) (
+func GetAvailableOrderInfo(ctx context.Context, req *mcp.CallToolRequest, params *GetAvailableOrderInfoRequest) (
 	*mcp.CallToolResult,
 	*upbit.Chance,
 	error,
@@ -234,7 +242,7 @@ func GetAvailableOrderInfo(ctx context.Context, req *mcp.CallToolRequest, params
 }
 
 // TODO. 지금은 최근 7일 동안의 조회만 가능함
-func GetClosedOrderHistory(ctx context.Context, req *mcp.CallToolRequest, params GetClosedOrderHistoryRequest) (
+func GetClosedOrderHistory(ctx context.Context, req *mcp.CallToolRequest, params *GetClosedOrderHistoryRequest) (
 	*mcp.CallToolResult,
 	*GetClosedOrderHistoryResult,
 	error,
@@ -259,7 +267,7 @@ func GetClosedOrderHistory(ctx context.Context, req *mcp.CallToolRequest, params
 	return &res, &GetClosedOrderHistoryResult{Orders: orderHistory}, nil
 }
 
-func GetOpenOrders(ctx context.Context, req *mcp.CallToolRequest, params GetOpenOrderHistoryRequest) (
+func GetOpenOrders(ctx context.Context, req *mcp.CallToolRequest, params *GetOpenOrderHistoryRequest) (
 	*mcp.CallToolResult,
 	*GetOpenOrderHistoryResult,
 	error,
