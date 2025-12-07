@@ -12,8 +12,8 @@
   - `GetOpenOrderList`: 현재 진행중인 주문 리스트
 - 시장 데이터 조회
   - `GetMarketCodes`: 마켓 코드 조회
-  - `GetTicks`: 최근 체결 내역
-  - `GetTicker`: 현재가 정보
+  - `GetMarketSummary`: 시장 정보 조회
+  - `GetRecentTradesByMarket`: 마켓에서 최근 체결 내역 조회
   - `GetOrderBooks`: 호가 정보
   - `GetDayCandles`: 일봉
   - `GetWeekCandles`: 주봉

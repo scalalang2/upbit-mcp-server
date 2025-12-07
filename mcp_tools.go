@@ -2,10 +2,14 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"upbit-mcp-server/upbit"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
+
+// upbitClientKey는 context 내에서 Upbit 클라이언트를 식별하기 위한 키
+type upbitClientKey struct{}
 
 type GetAccountsResult struct {
 	Accounts []upbit.Account `json:"accounts"`
@@ -63,230 +67,219 @@ type PlaceSellOrderByMarketRequest struct {
 	Volume string `json:"volume" jsonschema:"Sell order quantity. For example, entering 0.1 in the KRW-BTC pair will sell 0.1 BTC at market price"`
 }
 
-func AddUpbitTools(server *mcp.Server, client *upbit.Client) {
-	mcp.AddTool(
-		server,
-		&mcp.Tool{
-			Name:        "GetAccounts",
-			Description: "전체 계좌 조회"},
-		func(ctx context.Context, req *mcp.CallToolRequest, params any) (
-			*mcp.CallToolResult,
-			*GetAccountsResult,
-			error,
-		) {
-			var res mcp.CallToolResult
+func GetAccounts(ctx context.Context, req *mcp.CallToolRequest, params any) (
+	*mcp.CallToolResult,
+	*GetAccountsResult,
+	error,
+) {
+	client, ok := ctx.Value(upbitClientKey{}).(*upbit.Client)
+	if !ok {
+		return nil, nil, fmt.Errorf("Upbit client not found in context")
+	}
 
-			accounts, err := client.GetAccounts()
-			if err != nil {
-				return nil, nil, err
-			}
+	var res mcp.CallToolResult
 
-			return &res, &GetAccountsResult{Accounts: accounts}, nil
-		})
+	accounts, err := client.GetAccounts()
+	if err != nil {
+		return nil, nil, err
+	}
 
-	mcp.AddTool(
-		server,
-		&mcp.Tool{
-			Name:        "PlaceBuyOrderByLimit",
-			Description: "지정가 매수 주문하기"},
-		func(ctx context.Context, req *mcp.CallToolRequest, params PlaceBuyOrderByLimitRequest) (
-			*mcp.CallToolResult,
-			*upbit.Order,
-			error,
-		) {
-			var res mcp.CallToolResult
+	return &res, &GetAccountsResult{Accounts: accounts}, nil
+}
 
-			orderResult, err := client.PlaceOrder(upbit.RequestParams{
-				Market:  params.Market,
-				Side:    "bid",
-				OrdType: "limit",
-				Price:   params.Price,
-				Volume:  params.Volume,
-				SmpType: "cancel_maker",
-			})
-			if err != nil {
-				return nil, nil, err
-			}
+func PlaceBuyOrderByLimit(ctx context.Context, req *mcp.CallToolRequest, params PlaceBuyOrderByLimitRequest) (
+	*mcp.CallToolResult,
+	*upbit.Order,
+	error,
+) {
+	var res mcp.CallToolResult
 
-			return &res, &orderResult, nil
-		})
+	client, ok := ctx.Value(upbitClientKey{}).(*upbit.Client)
+	if !ok {
+		return nil, nil, fmt.Errorf("Upbit client not found in context")
+	}
 
-	mcp.AddTool(
-		server,
-		&mcp.Tool{
-			Name:        "PlaceBuyOrderByMarket",
-			Description: "시장가 매수 주문하기"},
-		func(ctx context.Context, req *mcp.CallToolRequest, params PlaceBuyOrderByMarketRequest) (
-			*mcp.CallToolResult,
-			*upbit.Order,
-			error,
-		) {
-			var res mcp.CallToolResult
+	orderResult, err := client.PlaceOrder(upbit.RequestParams{
+		Market:  params.Market,
+		Side:    "bid",
+		OrdType: "limit",
+		Price:   params.Price,
+		Volume:  params.Volume,
+		SmpType: "cancel_maker",
+	})
+	if err != nil {
+		return nil, nil, err
+	}
 
-			orderResult, err := client.PlaceOrder(upbit.RequestParams{
-				Market:  params.Market,
-				Side:    "bid",
-				OrdType: "price",
-				Price:   params.Price,
-				SmpType: "cancel_maker",
-			})
-			if err != nil {
-				return nil, nil, err
-			}
+	return &res, &orderResult, nil
+}
 
-			return &res, &orderResult, nil
-		})
+func PlaceBuyOrderByMarket(ctx context.Context, req *mcp.CallToolRequest, params PlaceBuyOrderByMarketRequest) (
+	*mcp.CallToolResult,
+	*upbit.Order,
+	error,
+) {
+	var res mcp.CallToolResult
 
-	mcp.AddTool(
-		server,
-		&mcp.Tool{
-			Name:        "PlaceSellOrderByLimit",
-			Description: "지정가 매도 주문하기"},
-		func(ctx context.Context, req *mcp.CallToolRequest, params PlaceSellOrderByLimitRequest) (
-			*mcp.CallToolResult,
-			*upbit.Order,
-			error,
-		) {
-			var res mcp.CallToolResult
+	client, ok := ctx.Value(upbitClientKey{}).(*upbit.Client)
+	if !ok {
+		return nil, nil, fmt.Errorf("Upbit client not found in context")
+	}
 
-			orderResult, err := client.PlaceOrder(upbit.RequestParams{
-				Market:  params.Market,
-				Side:    "ask",
-				OrdType: "limit",
-				Price:   params.Price,
-				Volume:  params.Volume,
-				SmpType: "cancel_maker",
-			})
-			if err != nil {
-				return nil, nil, err
-			}
+	orderResult, err := client.PlaceOrder(upbit.RequestParams{
+		Market:  params.Market,
+		Side:    "bid",
+		OrdType: "price",
+		Price:   params.Price,
+		SmpType: "cancel_maker",
+	})
+	if err != nil {
+		return nil, nil, err
+	}
 
-			return &res, &orderResult, nil
-		})
+	return &res, &orderResult, nil
+}
 
-	mcp.AddTool(
-		server,
-		&mcp.Tool{
-			Name:        "PlaceSellOrderByMarket",
-			Description: "시장가 매도 주문하기"},
-		func(ctx context.Context, req *mcp.CallToolRequest, params PlaceSellOrderByMarketRequest) (
-			*mcp.CallToolResult,
-			*upbit.Order,
-			error,
-		) {
-			var res mcp.CallToolResult
+func PlaceSellOrderByLimit(ctx context.Context, req *mcp.CallToolRequest, params PlaceSellOrderByLimitRequest) (
+	*mcp.CallToolResult,
+	*upbit.Order,
+	error,
+) {
+	var res mcp.CallToolResult
 
-			orderResult, err := client.PlaceOrder(upbit.RequestParams{
-				Market:  params.Market,
-				Side:    "ask",
-				OrdType: "market",
-				Volume:  params.Volume,
-				SmpType: "cancel_maker",
-			})
-			if err != nil {
-				return nil, nil, err
-			}
+	client, ok := ctx.Value(upbitClientKey{}).(*upbit.Client)
+	if !ok {
+		return nil, nil, fmt.Errorf("Upbit client not found in context")
+	}
 
-			return &res, &orderResult, nil
-		})
+	orderResult, err := client.PlaceOrder(upbit.RequestParams{
+		Market:  params.Market,
+		Side:    "ask",
+		OrdType: "limit",
+		Price:   params.Price,
+		Volume:  params.Volume,
+		SmpType: "cancel_maker",
+	})
+	if err != nil {
+		return nil, nil, err
+	}
 
-	mcp.AddTool(
-		server,
-		&mcp.Tool{
-			Name:        "CancelOrder",
-			Description: "지정가/시장가 매도 주문하기"},
-		func(ctx context.Context, req *mcp.CallToolRequest, params any) (
-			*mcp.CallToolResult,
-			*GetAccountsResult,
-			error,
-		) {
-			var res mcp.CallToolResult
+	return &res, &orderResult, nil
+}
 
-			accounts, err := client.GetAccounts()
-			if err != nil {
-				return nil, nil, err
-			}
+func PlaceSellOrderByMarket(ctx context.Context, req *mcp.CallToolRequest, params PlaceSellOrderByMarketRequest) (
+	*mcp.CallToolResult,
+	*upbit.Order,
+	error,
+) {
+	var res mcp.CallToolResult
 
-			return &res, &GetAccountsResult{Accounts: accounts}, nil
-		})
+	client, ok := ctx.Value(upbitClientKey{}).(*upbit.Client)
+	if !ok {
+		return nil, nil, fmt.Errorf("Upbit client not found in context")
+	}
 
-	mcp.AddTool(
-		server,
-		&mcp.Tool{
-			Name: "GetAvailableOrderInfo",
-			Description: `Retrieves the order availability information for the specified pair. 
-				The response doesn't include current trading pair prices 
-				you should consider the current price if you want to decide whether to buy or sell.`,
-		},
-		func(ctx context.Context, req *mcp.CallToolRequest, params GetAvailableOrderInfoRequest) (
-			*mcp.CallToolResult,
-			*upbit.Chance,
-			error,
-		) {
-			var res mcp.CallToolResult
+	orderResult, err := client.PlaceOrder(upbit.RequestParams{
+		Market:  params.Market,
+		Side:    "ask",
+		OrdType: "market",
+		Volume:  params.Volume,
+		SmpType: "cancel_maker",
+	})
+	if err != nil {
+		return nil, nil, err
+	}
 
-			chance, err := client.GetChance(params.Market)
-			if err != nil {
-				return nil, nil, err
-			}
+	return &res, &orderResult, nil
+}
 
-			return &res, &chance, nil
-		})
+func CancelOrder(ctx context.Context, req *mcp.CallToolRequest, params any) (
+	*mcp.CallToolResult,
+	*GetAccountsResult,
+	error,
+) {
+	var res mcp.CallToolResult
 
-	// TODO. 지금은 최근 7일 동안의 조회만 가능함
-	mcp.AddTool(
-		server,
-		&mcp.Tool{
-			Name: "GetClosedOrderHistory",
-			Description: `Retrieves the order availability information for the specified pair. 
-				The response doesn't include current trading pair prices 
-				you should consider the current price if you want to decide whether to buy or sell.`,
-		},
-		func(ctx context.Context, req *mcp.CallToolRequest, params GetClosedOrderHistoryRequest) (
-			*mcp.CallToolResult,
-			*GetClosedOrderHistoryResult,
-			error,
-		) {
-			var res mcp.CallToolResult
+	client, ok := ctx.Value(upbitClientKey{}).(*upbit.Client)
+	if !ok {
+		return nil, nil, fmt.Errorf("Upbit client not found in context")
+	}
 
-			orderHistory, err := client.GetOrderHistory(upbit.RequestParams{
-				Market:  params.Market,
-				State:   params.State,
-				OrderBy: params.OrderBy,
-				Limit:   params.Limit,
-			})
-			if err != nil {
-				return nil, nil, err
-			}
+	accounts, err := client.GetAccounts()
+	if err != nil {
+		return nil, nil, err
+	}
 
-			return &res, &GetClosedOrderHistoryResult{Orders: orderHistory}, nil
-		})
+	return &res, &GetAccountsResult{Accounts: accounts}, nil
+}
 
-	mcp.AddTool(
-		server,
-		&mcp.Tool{
-			Name: "GetOpenOrders",
-			Description: `Retrieves the order availability information for the specified pair. 
-				The response doesn't include current trading pair prices 
-				you should consider the current price if you want to decide whether to buy or sell.`,
-		},
-		func(ctx context.Context, req *mcp.CallToolRequest, params GetOpenOrderHistoryRequest) (
-			*mcp.CallToolResult,
-			*GetOpenOrderHistoryResult,
-			error,
-		) {
-			var res mcp.CallToolResult
+func GetAvailableOrderInfo(ctx context.Context, req *mcp.CallToolRequest, params GetAvailableOrderInfoRequest) (
+	*mcp.CallToolResult,
+	*upbit.Chance,
+	error,
+) {
+	var res mcp.CallToolResult
 
-			orderHistory, err := client.GetOpenOrders(upbit.RequestParams{
-				Market:  params.Market,
-				Page:    params.Page,
-				Limit:   params.Limit,
-				OrderBy: params.OrderBy,
-			})
-			if err != nil {
-				return nil, nil, err
-			}
+	client, ok := ctx.Value(upbitClientKey{}).(*upbit.Client)
+	if !ok {
+		return nil, nil, fmt.Errorf("Upbit client not found in context")
+	}
 
-			return &res, &GetOpenOrderHistoryResult{Orders: orderHistory}, nil
-		})
+	chance, err := client.GetChance(params.Market)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return &res, &chance, nil
+}
+
+// TODO. 지금은 최근 7일 동안의 조회만 가능함
+func GetClosedOrderHistory(ctx context.Context, req *mcp.CallToolRequest, params GetClosedOrderHistoryRequest) (
+	*mcp.CallToolResult,
+	*GetClosedOrderHistoryResult,
+	error,
+) {
+	var res mcp.CallToolResult
+
+	client, ok := ctx.Value(upbitClientKey{}).(*upbit.Client)
+	if !ok {
+		return nil, nil, fmt.Errorf("Upbit client not found in context")
+	}
+
+	orderHistory, err := client.GetOrderHistory(upbit.RequestParams{
+		Market:  params.Market,
+		State:   params.State,
+		OrderBy: params.OrderBy,
+		Limit:   params.Limit,
+	})
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return &res, &GetClosedOrderHistoryResult{Orders: orderHistory}, nil
+}
+
+func GetOpenOrders(ctx context.Context, req *mcp.CallToolRequest, params GetOpenOrderHistoryRequest) (
+	*mcp.CallToolResult,
+	*GetOpenOrderHistoryResult,
+	error,
+) {
+	var res mcp.CallToolResult
+
+	client, ok := ctx.Value(upbitClientKey{}).(*upbit.Client)
+	if !ok {
+		return nil, nil, fmt.Errorf("Upbit client not found in context")
+	}
+
+	orderHistory, err := client.GetOpenOrders(upbit.RequestParams{
+		Market:  params.Market,
+		Page:    params.Page,
+		Limit:   params.Limit,
+		OrderBy: params.OrderBy,
+	})
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return &res, &GetOpenOrderHistoryResult{Orders: orderHistory}, nil
 }
