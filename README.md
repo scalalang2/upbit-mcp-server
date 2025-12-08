@@ -12,7 +12,7 @@
   - `GetOpenOrderList`: 현재 진행중인 주문 리스트
 - 시장 데이터 조회
   - `GetMarketSummary`: 특정 시장 정보 조회
-  - `GetMarketTrends`: 
+  - `GetMarketTrends`: 현재 시장 트렌드 정보 조회 
   - `GetDayCandles`: 일봉
   - `GetWeekCandles`: 주봉
   - `GetMonthCandles`: 월봉

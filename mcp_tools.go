@@ -89,6 +89,23 @@ type GetMarketSummaryResult struct {
 	Ticker []upbit.Ticker `json:"ticker"`
 }
 
+type GetCandlesRequest struct {
+	Market string `json:"market" jsonschema:"Trading pair code representing the market (e.g. KRW-BTC, KRW-ETH ...)"`
+	To     string `json:"to,omitempty" jsonschema:"Last candle time (exclusive). Format: yyyy-MM-dd'T'HH:mm:ss'Z' or yyyy-MM-dd HH:mm:ss. Default is the current time."`
+	Count  int    `json:"count,omitempty" jsonschema:"Number of candles to retrieve. Max 200."`
+}
+
+type GetMinuteCandlesRequest struct {
+	Market string `json:"market" jsonschema:"Trading pair code representing the market (e.g. KRW-BTC, KRW-ETH ...)"`
+	Unit   int    `json:"unit" jsonschema:"Minute unit (1, 3, 5, 10, 15, 30, 60, 240)."`
+	To     string `json:"to,omitempty" jsonschema:"Last candle time (exclusive). Format: yyyy-MM-dd'T'HH:mm:ss'Z' or yyyy-MM-dd HH:mm:ss. Default is the current time."`
+	Count  int    `json:"count,omitempty" jsonschema:"Number of candles to retrieve. Max 200."`
+}
+
+type GetCandlesResult struct {
+	Candles []upbit.Candle `json:"candles"`
+}
+
 func GetAccounts(ctx context.Context, req *mcp.CallToolRequest, params any) (
 	*mcp.CallToolResult,
 	*GetAccountsResult,
@@ -318,9 +335,28 @@ func GetMarketSummary(ctx context.Context, req *mcp.CallToolRequest, params *Get
 		return nil, nil, fmt.Errorf("Upbit client not found in context")
 	}
 
-	markets := strings.Join(params.Markets, ",")
+	allAvailableMarkets, err := client.GetMarkets()
+	if err != nil {
+		return nil, nil, err
+	}
 
-	ticker, err := client.GetTicker(markets)
+	var marketCodes map[string]bool
+	for _, marketCode := range allAvailableMarkets {
+		marketCodes[marketCode.Market] = true
+	}
+
+	var markets []string
+	for _, market := range params.Markets {
+		if marketCodes[market] {
+			markets = append(markets, market)
+		}
+	}
+
+	if len(markets) == 0 {
+		return nil, nil, fmt.Errorf("no valid markets provided")
+	}
+
+	ticker, err := client.GetTicker(strings.Join(markets, ","))
 	if err != nil {
 		return nil, nil, err
 	}
@@ -346,4 +382,92 @@ func GetMarketTrends(ctx context.Context, req *mcp.CallToolRequest, params any) 
 	}
 
 	return &res, marketTrends, nil
+}
+
+func GetDayCandles(ctx context.Context, req *mcp.CallToolRequest, params *GetCandlesRequest) (
+	*mcp.CallToolResult,
+	*GetCandlesResult,
+	error,
+) {
+	client, ok := ctx.Value(upbitClientKey{}).(*upbit.Client)
+	if !ok {
+		return nil, nil, fmt.Errorf("Upbit client not found in context")
+	}
+
+	candles, err := client.GetDayCandles(upbit.RequestParams{
+		Market: params.Market,
+		To:     params.To,
+		Count:  params.Count,
+	})
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return &mcp.CallToolResult{}, &GetCandlesResult{Candles: candles}, nil
+}
+
+func GetWeekCandles(ctx context.Context, req *mcp.CallToolRequest, params *GetCandlesRequest) (
+	*mcp.CallToolResult,
+	*GetCandlesResult,
+	error,
+) {
+	client, ok := ctx.Value(upbitClientKey{}).(*upbit.Client)
+	if !ok {
+		return nil, nil, fmt.Errorf("Upbit client not found in context")
+	}
+
+	candles, err := client.GetWeekCandles(upbit.RequestParams{
+		Market: params.Market,
+		To:     params.To,
+		Count:  params.Count,
+	})
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return &mcp.CallToolResult{}, &GetCandlesResult{Candles: candles}, nil
+}
+
+func GetMonthCandles(ctx context.Context, req *mcp.CallToolRequest, params *GetCandlesRequest) (
+	*mcp.CallToolResult,
+	*GetCandlesResult,
+	error,
+) {
+	client, ok := ctx.Value(upbitClientKey{}).(*upbit.Client)
+	if !ok {
+		return nil, nil, fmt.Errorf("Upbit client not found in context")
+	}
+
+	candles, err := client.GetMonthCandles(upbit.RequestParams{
+		Market: params.Market,
+		To:     params.To,
+		Count:  params.Count,
+	})
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return &mcp.CallToolResult{}, &GetCandlesResult{Candles: candles}, nil
+}
+
+func GetMinuteCandles(ctx context.Context, req *mcp.CallToolRequest, params *GetMinuteCandlesRequest) (
+	*mcp.CallToolResult,
+	*GetCandlesResult,
+	error,
+) {
+	client, ok := ctx.Value(upbitClientKey{}).(*upbit.Client)
+	if !ok {
+		return nil, nil, fmt.Errorf("Upbit client not found in context")
+	}
+
+	candles, err := client.GetMinuteCandles(params.Unit, upbit.RequestParams{
+		Market: params.Market,
+		To:     params.To,
+		Count:  params.Count,
+	})
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return &mcp.CallToolResult{}, &GetCandlesResult{Candles: candles}, nil
 }

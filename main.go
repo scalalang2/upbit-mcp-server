@@ -47,8 +47,12 @@ func main() {
 	mcp.AddTool(server, &mcp.Tool{Name: "GetAvailableOrderInfo", Description: getAvailableOrderInfoDescription}, GetAvailableOrderInfo)
 	mcp.AddTool(server, &mcp.Tool{Name: "GetClosedOrderHistory", Description: getClosedOrderHistoryDescription}, GetClosedOrderHistory)
 	mcp.AddTool(server, &mcp.Tool{Name: "GetOpenOrders", Description: getOpenOrdersDescription}, GetOpenOrders)
-	mcp.AddTool(server, &mcp.Tool{Name: "GetMarketSummary", Description: "Summarized multiple market information"}, GetMarketSummary)
+	mcp.AddTool(server, &mcp.Tool{Name: "GetMarketSummary", Description: "Summarized multiple market information. If given market is unavailable in Upbit, then the return value doesn't include it"}, GetMarketSummary)
 	mcp.AddTool(server, &mcp.Tool{Name: "GetMarketTrends", Description: "Get market trends, top 10 market by volume, top 10 gainers and top 10 losers"}, GetMarketTrends)
+	mcp.AddTool(server, &mcp.Tool{Name: "GetDayCandles", Description: "Get daily candles"}, GetDayCandles)
+	mcp.AddTool(server, &mcp.Tool{Name: "GetWeekCandles", Description: "Get weekly candles"}, GetWeekCandles)
+	mcp.AddTool(server, &mcp.Tool{Name: "GetMonthCandles", Description: "Get monthly candles"}, GetMonthCandles)
+	mcp.AddTool(server, &mcp.Tool{Name: "GetMinuteCandles", Description: "Get minute candles"}, GetMinuteCandles)
 
 	log.Println("MCP server started")
 	if err := server.Run(ctx, &mcp.StdioTransport{}); err != nil {
