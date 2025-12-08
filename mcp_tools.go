@@ -340,12 +340,12 @@ func GetMarketSummary(ctx context.Context, req *mcp.CallToolRequest, params *Get
 		return nil, nil, err
 	}
 
-	var marketCodes map[string]bool
+	marketCodes := make(map[string]bool)
 	for _, marketCode := range allAvailableMarkets {
 		marketCodes[marketCode.Market] = true
 	}
 
-	var markets []string
+	markets := []string{}
 	for _, market := range params.Markets {
 		if marketCodes[market] {
 			markets = append(markets, market)
