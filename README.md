@@ -17,12 +17,12 @@
   - `GetWeekCandles`: 주봉
   - `GetMonthCandles`: 월봉
   - `GetMinuteCandles`: 분봉
-- 기술적 분석 지표
-  - 이동 평균선
-  - MACD
-  - RSI
-  - Bollinger Bands
-  - ODV
+- 기술적 분석 지표 조회
+  - `GetMovingAverage`
+  - `GetMACD`
+  - `GetBollingerBands`
+  - `GetRSI`
+  - `GetOBV`
 
 ## MCP 연동 방법
 ```json

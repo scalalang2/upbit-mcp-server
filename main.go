@@ -54,6 +54,13 @@ func main() {
 	mcp.AddTool(server, &mcp.Tool{Name: "GetMonthCandles", Description: "Get monthly candles"}, GetMonthCandles)
 	mcp.AddTool(server, &mcp.Tool{Name: "GetMinuteCandles", Description: "Get minute candles"}, GetMinuteCandles)
 
+	// Add technical analysis tools
+	mcp.AddTool(server, &mcp.Tool{Name: "GetMovingAverage", Description: "Get moving average (SMA, EMA)"}, GetMovingAverage)
+	mcp.AddTool(server, &mcp.Tool{Name: "GetMACD", Description: "Get MACD"}, GetMACD)
+	mcp.AddTool(server, &mcp.Tool{Name: "GetBollingerBands", Description: "Get Bollinger Bands"}, GetBollingerBands)
+	mcp.AddTool(server, &mcp.Tool{Name: "GetRSI", Description: "Get RSI"}, GetRSI)
+	mcp.AddTool(server, &mcp.Tool{Name: "GetOBV", Description: "Get OBV"}, GetOBV)
+
 	log.Println("MCP server started")
 	if err := server.Run(ctx, &mcp.StdioTransport{}); err != nil {
 		log.Fatal(err)

@@ -103,7 +103,7 @@ type GetMinuteCandlesRequest struct {
 }
 
 type GetCandlesResult struct {
-	Candles []upbit.Candle `json:"candles"`
+	Candles []*upbit.Candle `json:"candles"`
 }
 
 func GetAccounts(ctx context.Context, req *mcp.CallToolRequest, params any) (

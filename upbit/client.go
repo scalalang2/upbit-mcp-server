@@ -148,29 +148,29 @@ func (c *Client) GetOrderBooks(symbol string) ([]OrderBook, error) {
 }
 
 // GetDayCandles: 일봉
-func (c *Client) GetDayCandles(params RequestParams) ([]Candle, error) {
-	var res []Candle
+func (c *Client) GetDayCandles(params RequestParams) ([]*Candle, error) {
+	var res []*Candle
 	err := c.doNonAuthRequest("candles/days", params, &res)
 	return res, err
 }
 
 // GetWeekCandles: 주봉
-func (c *Client) GetWeekCandles(params RequestParams) ([]Candle, error) {
-	var res []Candle
+func (c *Client) GetWeekCandles(params RequestParams) ([]*Candle, error) {
+	var res []*Candle
 	err := c.doNonAuthRequest("candles/weeks", params, &res)
 	return res, err
 }
 
 // GetMonthCandles: 월봉
-func (c *Client) GetMonthCandles(params RequestParams) ([]Candle, error) {
-	var res []Candle
+func (c *Client) GetMonthCandles(params RequestParams) ([]*Candle, error) {
+	var res []*Candle
 	err := c.doNonAuthRequest("candles/months", params, &res)
 	return res, err
 }
 
 // GetMinuteCandles: 분봉
-func (c *Client) GetMinuteCandles(unit int, params RequestParams) ([]Candle, error) {
-	var res []Candle
+func (c *Client) GetMinuteCandles(unit int, params RequestParams) ([]*Candle, error) {
+	var res []*Candle
 	endpoint := fmt.Sprintf("candles/minutes/%d", unit)
 	err := c.doNonAuthRequest(endpoint, params, &res)
 	return res, err
